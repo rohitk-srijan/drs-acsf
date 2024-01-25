@@ -2,23 +2,24 @@
 
 namespace Drush\Commands\drs_acsf;
 
+use Acquia\Drupal\RecommendedSettings\Drush\Commands\BaseDrushCommands;
 use Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException;
 use Acquia\Drupal\RecommendedSettings\Helpers\EnvironmentDetector;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
-use Drush\Commands\DrushCommands;
-use Symfony\Component\Filesystem\Filesystem;
+use Consolidation\AnnotatedCommand\AnnotationData;
+use Consolidation\AnnotatedCommand\Hooks\HookManager;
+use Robo\Contract\VerbosityThresholdInterface;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
- * A drush command file.
+ * A DrsAcsfCommands drush command file.
  */
-class AcsfDrsCommands extends DrushCommands implements SiteAliasManagerAwareInterface {
-  use SiteAliasManagerAwareTrait;
+class DrsAcsfCommands extends BaseDrushCommands {
 
   /**
-   * Prints information about the command.
+   * Display message when running command drs:acsf:init:all.
    */
-  public function printPreamble(): void {
+  #[CLI\Hook(type: HookManager::INITIALIZE, target: "drs:acsf:init:all")]
+  public function init(InputInterface $input, AnnotationData $annotationData): void {
     $this->logger->notice("This command will initialize support for Acquia Cloud Site Factory by performing the following tasks:");
     $this->logger->notice("  * Executing the `acsf-init` command, provided by the drupal/acsf module.");
     $this->logger->notice("  * Adding default factory-hooks to your application.");
@@ -38,7 +39,6 @@ class AcsfDrsCommands extends DrushCommands implements SiteAliasManagerAwareInte
    * @aliases daia
    */
   public function drsAcsfInitialize(): void {
-    $this->printPreamble();
     $this->drsAcsfHooksInitialize();
     $this->drsAcsfComposerInitialize();
     $this->drsAcsfDrushInitialize();
@@ -53,29 +53,12 @@ class AcsfDrsCommands extends DrushCommands implements SiteAliasManagerAwareInte
    */
   public function drsAcsfDrushInitialize(): void {
     $this->say('Executing initialization command provided acsf module...');
-    $acsf_include = DRUPAL_ROOT . '/modules/contrib/acsf/acsf_init';
+    $acsfInclude = DRUPAL_ROOT . '/modules/contrib/acsf/acsf_init';
+    $result = $this->taskExecStack()
+      ->exec(EnvironmentDetector::getRepoRoot() . "/vendor/bin/drush acsf-init --include=\"$acsfInclude\" --root=\"" . DRUPAL_ROOT . "\" -y")
+      ->run();
 
-    $selfAlias = $this->siteAliasManager()->getSelf();
-    $options = [
-      'include' => $acsf_include,
-    ];
-
-    /** @var \Drush\SiteAlias\ProcessManager $drush_process */
-    $drush_process = $this->processManager()->drush($selfAlias, 'acsf-init', [], $options);
-
-    /** @var \Symfony\Component\Process\Process $drush_process */
-    $drush_process->run();
-
-    // Use symfony process component getIterator to get all output
-    // and log them in system using drupal logger service
-    // so that sumo logic can take the logs from system.
-    // https://symfony.com/doc/current/components/process.html#usage
-    $iterator = $drush_process->getIterator();
-    foreach ($iterator as $message) {
-      $this->logger->notice($message);
-    }
-
-    if (!$drush_process->isSuccessful()) {
+    if (!$result->wasSuccessful()) {
       throw new SettingsException("Unable to copy ACSF scripts.");
     }
 
@@ -110,35 +93,16 @@ class AcsfDrsCommands extends DrushCommands implements SiteAliasManagerAwareInte
   public function drsAcsfHooksInitialize(): void {
     $defaultAcsfHooks = __DIR__ . '/factory-hooks';
     $projectAcsfHooks = EnvironmentDetector::getRepoRoot() . '/factory-hooks';
-    $file_system = new Filesystem();
-    $file_system->mirror($defaultAcsfHooks, $projectAcsfHooks);
-    $this->say('New "factory-hooks/" directory created in repo root. Please commit this to your project.');
-  }
 
-  /**
-   * Update current database to reflect the state of the Drupal file system.
-   *
-   * @command drupal:update
-   * @aliases du setup:update
-   */
-  public function update(): void {
-    $selfAlias = $this->siteAliasManager()->getSelf();
+    $result = $this->taskCopyDir([$defaultAcsfHooks => $projectAcsfHooks])
+      ->setVerbosityThreshold(VerbosityThresholdInterface::VERBOSITY_VERBOSE)
+      ->run();
 
-    /** @var \Drush\SiteAlias\ProcessManager $drush_process */
-    $drush_process = $this->processManager()->drush($selfAlias, 'updb');
-
-    /** @var \Symfony\Component\Process\Process $drush_process */
-    $drush_process->run();
-
-    if (!$drush_process->isSuccessful()) {
-      throw new SettingsException("Failed to execute database updates!");
+    if (!$result->wasSuccessful()) {
+      throw new SettingsException("Unable to copy ACSF scripts.");
     }
 
-    /** @var \Drush\SiteAlias\ProcessManager $drush_process */
-    $drush_process = $this->processManager()->drush($selfAlias, 'deploy:hook');
-
-    /** @var \Symfony\Component\Process\Process $drush_process */
-    $drush_process->run();
+    $this->say('New "factory-hooks/" directory created in repo root. Please commit this to your project.');
   }
 
 }
