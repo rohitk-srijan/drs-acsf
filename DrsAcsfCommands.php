@@ -19,7 +19,7 @@ class DrsAcsfCommands extends BaseDrushCommands {
    * Display message when running command drs:acsf:init:all.
    */
   #[CLI\Hook(type: HookManager::INITIALIZE, target: "drs:acsf:init:all")]
-  public function init(InputInterface $input, AnnotationData $annotationData): void {
+  public function initialize(InputInterface $input, AnnotationData $annotationData): void {
     $this->logger->notice("This command will initialize support for Acquia Cloud Site Factory by performing the following tasks:");
     $this->logger->notice("  * Executing the `acsf-init` command, provided by the drupal/acsf module.");
     $this->logger->notice("  * Adding default factory-hooks to your application.");
