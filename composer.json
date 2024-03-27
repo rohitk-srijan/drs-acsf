@@ -27,7 +27,7 @@
   "minimum-stability": "dev",
   "require": {
     "drupal/acsf":"^2.47.0",
-    "acquia/drupal-recommended-settings": "dev-ACMS-3507"
+    "acquia/drupal-recommended-settings": "^1.0"
   },
   "require-dev": {
     "acquia/coding-standards": "^1.0"
