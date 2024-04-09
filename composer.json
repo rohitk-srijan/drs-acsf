@@ -1,9 +1,8 @@
 {
-  "name":  "acquia/drs_acsf",
-  "type":  "drupal-drush",
+  "name":  "acquia/drs-acsf",
   "description":  "Acquia recommended acsf drush commands.",
   "keywords":  [
-    "drush",
+    "acsf",
     "drupal"
   ],
   "license":  "GPL-2.0-or-later",
@@ -24,13 +23,17 @@
       "url": "https://packages.drupal.org/8"
     }
   },
-  "minimum-stability": "dev",
   "require": {
     "drupal/acsf":"^2.47.0",
     "acquia/drupal-recommended-settings": "^1.0"
   },
   "require-dev": {
     "acquia/coding-standards": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Acquia\\DrsAcsf\\": "src/"
+    }
   },
   "config": {
     "allow-plugins": {

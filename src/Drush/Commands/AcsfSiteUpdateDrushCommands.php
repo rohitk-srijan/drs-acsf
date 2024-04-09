@@ -1,13 +1,13 @@
 <?php
 
-namespace Drush\Commands\drs_acsf;
+namespace Acquia\DrsAcsf\Drush\Commands;
 
 use Acquia\Drupal\RecommendedSettings\Drush\Commands\BaseDrushCommands;
 
 /**
  * A DrsAcsfSiteUpdateCommands drush command file.
  */
-class DrsAcsfSiteUpdateCommands extends BaseDrushCommands {
+class AcsfSiteUpdateDrushCommands extends BaseDrushCommands {
 
   /**
    * Update current database to reflect the state of the Drupal file system.
