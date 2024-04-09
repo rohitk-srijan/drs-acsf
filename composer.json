@@ -1,34 +1,37 @@
 {
-  "name":  "acquia/drs-acsf",
-  "description":  "Acquia recommended acsf drush commands.",
-  "keywords":  [
+  "name": "acquia/drs-acsf",
+  "description": "Acquia recommended acsf drush commands.",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
     "acsf",
     "drupal"
   ],
-  "license":  "GPL-2.0-or-later",
-  "authors":  [{
-      "name":  "Acquia  Engineering",
-      "homepage":  "https://www.acquia.com",
-      "role":  "Maintainer"
+  "authors": [
+    {
+      "name": "Acquia  Engineering",
+      "homepage": "https://www.acquia.com",
+      "role": "Maintainer"
     },
     {
-      "name":  "Chandan Singh",
-      "email":  "chandan.singh@acquia.com",
-      "role":  "Maintainer"
+      "name": "Chandan Singh",
+      "email": "chandan.singh@acquia.com",
+      "role": "Maintainer"
     }
   ],
+  "require": {
+    "acquia/drupal-recommended-settings": "^1.0",
+    "drupal/acsf": "^2.47.0"
+  },
+  "require-dev": {
+    "acquia/coding-standards": "^1.0",
+    "ergebnis/composer-normalize": "^2.30.2",
+    "phpro/grumphp-shim": "^2.2"
+  },
   "repositories": {
     "drupal": {
       "type": "composer",
       "url": "https://packages.drupal.org/8"
     }
-  },
-  "require": {
-    "drupal/acsf":"^2.47.0",
-    "acquia/drupal-recommended-settings": "^1.0"
-  },
-  "require-dev": {
-    "acquia/coding-standards": "^1.0"
   },
   "autoload": {
     "psr-4": {
