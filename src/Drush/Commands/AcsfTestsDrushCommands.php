@@ -1,6 +1,6 @@
 <?php
 
-namespace Drush\Commands\drs_acsf;
+namespace Acquia\DrsAcsf\Drush\Commands;
 
 use Acquia\Drupal\RecommendedSettings\Drush\Commands\BaseDrushCommands;
 use Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException;
@@ -8,7 +8,7 @@ use Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException;
 /**
  * A DrsAcsfTestsCommand drush command file.
  */
-class DrsAcsfTestsCommand extends BaseDrushCommands {
+class AcsfTestsDrushCommands extends BaseDrushCommands {
 
   /**
    * Executes the acsf-init-validate command.

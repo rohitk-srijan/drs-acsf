@@ -1,25 +1,26 @@
 <?php
 
-namespace Drush\Commands\drs_acsf;
+namespace Acquia\DrsAcsf\Drush\Commands;
 
 use Acquia\Drupal\RecommendedSettings\Drush\Commands\BaseDrushCommands;
 use Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException;
-use Acquia\Drupal\RecommendedSettings\Helpers\EnvironmentDetector;
 use Consolidation\AnnotatedCommand\AnnotationData;
 use Consolidation\AnnotatedCommand\Hooks\HookManager;
 use Robo\Contract\VerbosityThresholdInterface;
+use Robo\ResultData;
 use Symfony\Component\Console\Input\InputInterface;
+use Drush\Attributes as Cli;
 
 /**
  * A DrsAcsfCommands drush command file.
  */
-class DrsAcsfCommands extends BaseDrushCommands {
+class AcsfRecipesDrushCommands extends BaseDrushCommands {
 
   /**
    * Display message when running command drs:acsf:init:all.
    */
   #[CLI\Hook(type: HookManager::INITIALIZE, target: "drs:acsf:init:all")]
-  public function initialize(InputInterface $input, AnnotationData $annotationData): void {
+  public function initialize(): void {
     $this->logger->notice("This command will initialize support for Acquia Cloud Site Factory by performing the following tasks:");
     $this->logger->notice("  * Executing the `acsf-init` command, provided by the drupal/acsf module.");
     $this->logger->notice("  * Adding default factory-hooks to your application.");
@@ -28,34 +29,40 @@ class DrsAcsfCommands extends BaseDrushCommands {
     $this->logger->notice("You may wish to adjust the PHP version of your local environment and CI tools to match.");
     $this->logger->notice("");
     $this->logger->notice("For more information, see:");
-    $this->logger->notice("<comment>https://docs.acquia.com/drs/tech-architect/acsf-setup/</comment>");
+    $this->logger->notice("<comment>https://docs.acquia.com/acquia-cms/developer-experience/using-drupal-recommended-settings-plugin#section-using-drs-with-site-factory</comment>");
   }
 
   /**
    * Initializes ACSF support for project.
-   *
-   * @command drs:acsf:init:all
-   *
-   * @aliases daia
    */
-  public function drsAcsfInitialize(): void {
-    $this->drsAcsfHooksInitialize();
-    $this->drsAcsfComposerInitialize();
-    $this->drsAcsfDrushInitialize();
+  #[CLI\Command(name: "drs:acsf:init:all", aliases: ["daia"])]
+  #[CLI\Help(description: "Initializes ACSF support for project.")]
+  public function drsAcsfInitialize(): int {
+    try {
+      $this->drsAcsfHooksInitialize();
+      $this->drsAcsfComposerInitialize();
+      $this->drsAcsfDrushInitialize();
+    } catch (\Exception $e) {
+      $this->print($e->getMessage(), "error");
+      return ResultData::EXITCODE_ERROR;
+    }
+    return ResultData::EXITCODE_OK;
   }
 
   /**
    * Refreshes the ACSF settings and hook files.
    *
-   * @command drs:acsf:init:drush
-   *
-   * @aliases daid
+   * @throws SettingsException|\Robo\Exception\TaskException
    */
+  #[CLI\Command(name: "drs:acsf:init:drush", aliases: ["daid"])]
+  #[CLI\Help(description: "Refreshes the ACSF settings and hook files.")]
   public function drsAcsfDrushInitialize(): void {
     $this->say('Executing initialization command provided acsf module...');
-    $acsfInclude = DRUPAL_ROOT . '/modules/contrib/acsf/acsf_init';
+    $repoRoot = $this->getConfigValue('repo.root');
+    $docRoot = $this->getConfigValue('docroot');
+    $acsfInclude = $docRoot . '/modules/contrib/acsf/acsf_init';
     $result = $this->taskExecStack()
-      ->exec(EnvironmentDetector::getRepoRoot() . "/vendor/bin/drush acsf-init --include=\"$acsfInclude\" --root=\"" . DRUPAL_ROOT . "\" -y")
+      ->exec("$repoRoot/vendor/bin/drush acsf-init --include=\"$acsfInclude\" --root=\"$docRoot\" -y")
       ->run();
 
     if (!$result->wasSuccessful()) {
@@ -69,7 +76,7 @@ class DrsAcsfCommands extends BaseDrushCommands {
    */
   public function drsAcsfComposerInitialize(): void {
     // .htaccess will be patched, excluding from further updates.
-    $composer_filepath = EnvironmentDetector::getRepoRoot() . '/composer.json';
+    $composer_filepath = $this->getConfigValue('repo.root') . '/composer.json';
     $composer_contents = json_decode(file_get_contents($composer_filepath));
     // Drupal Scaffold version (deprecate in Drupal 8.8, remove in Drupal 9).
     if (!property_exists($composer_contents->extra->{'drupal-scaffold'}, 'excludes') || !in_array('.htaccess', $composer_contents->extra->{'drupal-scaffold'}->excludes)) {
@@ -87,12 +94,13 @@ class DrsAcsfCommands extends BaseDrushCommands {
   /**
    * Creates "factory-hooks/" directory in project's repo root.
    *
-   * @command drs:acsf:init:hooks
-   * @aliases daih
+   * @throws SettingsException
    */
+  #[CLI\Command(name: "drs:acsf:init:hooks", aliases: ["daih"])]
+  #[CLI\Help(description: "Creates \"factory-hooks/\" directory in project's repo root.")]
   public function drsAcsfHooksInitialize(): void {
-    $defaultAcsfHooks = __DIR__ . '/factory-hooks';
-    $projectAcsfHooks = EnvironmentDetector::getRepoRoot() . '/factory-hooks';
+    $defaultAcsfHooks = __DIR__ . '/../../../factory-hooks';
+    $projectAcsfHooks = $this->getConfigValue('repo.root') . '/factory-hooks';
 
     $result = $this->taskCopyDir([$defaultAcsfHooks => $projectAcsfHooks])
       ->setVerbosityThreshold(VerbosityThresholdInterface::VERBOSITY_VERBOSE)
