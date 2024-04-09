@@ -4,6 +4,8 @@
  * @file
  * ACSF post-sites-php hook.
  *
+ * @phpcs:disable SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable.DisallowedSuperGlobalVariable
+ *
  * @see https://docs.acquia.com/site-factory/tiers/paas/workflow/hooks
  */
 

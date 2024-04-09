@@ -4,12 +4,10 @@ namespace Acquia\DrsAcsf\Drush\Commands;
 
 use Acquia\Drupal\RecommendedSettings\Drush\Commands\BaseDrushCommands;
 use Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException;
-use Consolidation\AnnotatedCommand\AnnotationData;
 use Consolidation\AnnotatedCommand\Hooks\HookManager;
+use Drush\Attributes as Cli;
 use Robo\Contract\VerbosityThresholdInterface;
 use Robo\ResultData;
-use Symfony\Component\Console\Input\InputInterface;
-use Drush\Attributes as Cli;
 
 /**
  * A DrsAcsfCommands drush command file.
@@ -42,7 +40,8 @@ class AcsfRecipesDrushCommands extends BaseDrushCommands {
       $this->drsAcsfHooksInitialize();
       $this->drsAcsfComposerInitialize();
       $this->drsAcsfDrushInitialize();
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $this->print($e->getMessage(), "error");
       return ResultData::EXITCODE_ERROR;
     }
@@ -52,7 +51,7 @@ class AcsfRecipesDrushCommands extends BaseDrushCommands {
   /**
    * Refreshes the ACSF settings and hook files.
    *
-   * @throws SettingsException|\Robo\Exception\TaskException
+   * @throws \Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException|\Robo\Exception\TaskException
    */
   #[CLI\Command(name: "drs:acsf:init:drush", aliases: ["daid"])]
   #[CLI\Help(description: "Refreshes the ACSF settings and hook files.")]
@@ -94,7 +93,7 @@ class AcsfRecipesDrushCommands extends BaseDrushCommands {
   /**
    * Creates "factory-hooks/" directory in project's repo root.
    *
-   * @throws SettingsException
+   * @throws \Acquia\Drupal\RecommendedSettings\Exceptions\SettingsException
    */
   #[CLI\Command(name: "drs:acsf:init:hooks", aliases: ["daih"])]
   #[CLI\Help(description: "Creates \"factory-hooks/\" directory in project's repo root.")]
