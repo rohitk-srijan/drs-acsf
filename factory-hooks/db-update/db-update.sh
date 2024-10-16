@@ -26,12 +26,7 @@ domain="$4"
 # Drush executable:
 drush="/mnt/www/html/$sitegroup.$env/vendor/bin/drush"
 
-# drush wants the name of the website, which we can derive from its internal
-# domain name. Use the uri.php file provided by the acsf module to get the
-# internal domain name based on the site, environment and db role arguments.
-uri=`/usr/bin/env php /mnt/www/html/$sitegroup.$env/hooks/acquia/uri.php $sitegroup $env $db_role`
-
-echo "Running DRS deploy tasks on $uri domain in $env environment on the $sitegroup subscription."
+echo "Running DRS deploy tasks on $domain domain in $env environment on the $sitegroup subscription."
 
 # Run drush drupal:update tasks. The trailing slash behind the domain works
 # around a bug in Drush < 9.6 for path based domains: "domain.com/subpath/" is
