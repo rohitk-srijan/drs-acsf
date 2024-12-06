@@ -2,7 +2,7 @@
 #
 # Factory Hook: post-site-install
 #
-# This is necessary so that blt drupal:install tasks are invoked automatically
+# This is necessary so that drush drupal:install tasks are invoked automatically
 # when a site is created on ACSF.
 #
 # Usage: post-site-install.sh sitegroup env db-role domain
@@ -28,12 +28,12 @@ internal_domain="$4"
 drush="/mnt/www/html/$sitegroup.$env/vendor/bin/drush"
 
 # Execute the updates.
-drush drupal:update --uri=$internal_domain --verbose --no-interaction
+${drush} drupal:update --uri=$internal_domain --verbose --no-interaction
 result=$?
 
 set +v
 
-# Exit with the status of the BLT commmand. If the exit status is non-zero,
+# Exit with the status of the drush commmand. If the exit status is non-zero,
 # Site Factory will send a notification of a partiolly failed install and will
 # stop executing any further post-site-install hook scripts that would be in
 # this directory (and get executed in alphabetical order).
