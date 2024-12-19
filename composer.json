@@ -19,7 +19,7 @@
     }
   ],
   "require": {
-    "acquia/drupal-recommended-settings": "^1.0",
+    "acquia/drupal-recommended-settings": "*",
     "drupal/acsf": "^2.47.0"
   },
   "require-dev": {
